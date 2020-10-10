@@ -17,7 +17,7 @@
         android:layout_marginBottom="10dp"
         android:fontFamily="sans-serif-condensed-medium"
         android:textColor="#ffffff"
-        android:text="QueryBox Login"
+        android:text="Login"
         android:textSize="28dp"
         android:layout_gravity="center"/>
 
