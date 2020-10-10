@@ -1,16 +1,25 @@
 package com.example.chatapp;
 
+import android.animation.Animator;
+import android.annotation.SuppressLint;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
+import android.util.TypedValue;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.ScrollView;
+import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -30,7 +39,12 @@ public class QueryChat extends AppCompatActivity {
     ScrollView scrollView;
     Firebase reference1, reference2;
     TextView tv;
-
+    SeekBar sb;
+    int p = 20;
+    private Handler repeatUpdateHandler = new Handler();
+    private boolean mAutoIncrement = false;
+    public int mValue = 20;
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +56,7 @@ public class QueryChat extends AppCompatActivity {
         messageArea = (EditText)findViewById(R.id.messageArea);
         scrollView = (ScrollView)findViewById(R.id.scrollView);
         tv=findViewById(R.id.mytext);
+        sb = findViewById(R.id.seekBar);
 
         Firebase.setAndroidContext(this);
         reference1 = new Firebase("https://chatapp-63360.firebaseio.com//messages/" + UserDetails.username + "_" + UserDetails.chatWith);
@@ -53,8 +68,7 @@ public class QueryChat extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String messageText = messageArea.getText().toString();
-
-                if(!messageText.equals("")){
+                if(!messageText.equals("")) {
                     Map<String, String> map = new HashMap<String, String>();
                     map.put("message", messageText);
                     map.put("user", UserDetails.username);
@@ -64,6 +78,56 @@ public class QueryChat extends AppCompatActivity {
                 }
             }
         });
+        sendButton.setOnLongClickListener(
+                new View.OnLongClickListener(){
+                    public boolean onLongClick(View arg0) {
+                        mAutoIncrement = true;
+                        repeatUpdateHandler.post( new RptUpdater() );
+                        return false;
+                    }
+                }
+        );
+
+        sendButton.setOnTouchListener( new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                if( (event.getAction()==MotionEvent.ACTION_UP || event.getAction()==MotionEvent.ACTION_CANCEL)
+                        && mAutoIncrement ){
+                    mAutoIncrement = false;
+                    sb.setProgress(mValue);
+                    p=mValue;
+                    String messageText = messageArea.getText().toString();
+                    if(!messageText.equals("")) {
+                        Map<String, String> map = new HashMap<String, String>();
+                        map.put("message", messageText);
+                        map.put("user", UserDetails.username);
+                        reference1.push().setValue(map);
+                        reference2.push().setValue(map);
+                        messageArea.setText("");
+                    }
+                    messageArea.setTextSize(20);
+                    mValue=20;
+                }
+                return false;
+            }
+        });
+        sb.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                p = progress;
+                //messageArea.setTextSize(p);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+        });
+
 
         reference1.addChildEventListener(new ChildEventListener() {
             @Override
@@ -104,7 +168,9 @@ public class QueryChat extends AppCompatActivity {
 
     public void addMessageBox(String message, int type){
         TextView textView = new TextView(QueryChat.this);
+        textView.setTextSize(p+1);
         textView.setText(message);
+        sb.setProgress(20);
 
         LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         lp2.weight = 1.0f;
@@ -123,4 +189,18 @@ public class QueryChat extends AppCompatActivity {
         layout.addView(textView);
         scrollView.fullScroll(View.FOCUS_DOWN);
     }
+
+    class RptUpdater implements Runnable {
+        public void run() {
+            if( mAutoIncrement ){
+                increment();
+                repeatUpdateHandler.postDelayed( new RptUpdater(), 50);
+            }
+        }
+    }
+    public void increment(){
+        mValue++;
+        messageArea.setTextSize(mValue);
+    }
+
 }
