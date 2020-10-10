@@ -24,4 +24,5 @@ Before sending texts the user has to register to the app using a unique username
 
 # To Directly Login and Check
 Username : Travis
+
 Password : 12345
