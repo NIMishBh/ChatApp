@@ -1,5 +1,4 @@
-# ChatApp
-Bobble.ai Android Internship Challenge.
+# Bobble.ai Android Internship Challenge.
 I was tasked to create an app with an option to display text entered by the user like a
 threaded conversation.
 
