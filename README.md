@@ -21,3 +21,7 @@ about user experience if the data is too much).
 I made a threaded chat application much like WhatsApp. Users can send the text, hold the send button to enlarge the text and send it.
 It uses Firebase's Realtime Db as it's backend.
 Before sending texts the user has to register to the app using a unique username and password and login using that to start texting.
+
+# To Directly Login and Check
+Username : Travis
+Password : 12345
